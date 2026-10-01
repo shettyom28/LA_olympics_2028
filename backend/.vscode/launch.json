@@ -1,0 +1,130 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "manage.py runserver",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "runserver"
+            ],
+            "env": {
+                // "REDIS_URL": "redis://127.0.0.1:6379/0",
+            },
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py runserver (debug logs)",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "runserver"
+            ],
+            "env": {
+                "LOGLEVEL_DB": "DEBUG",
+                "LOGLEVEL_APP": "DEBUG",
+            },
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py makemigrations",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "makemigrations"
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py migrate",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "migrate"
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py createsuperuser",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "createsuperuser",
+                "--noinput"
+            ],
+            "env": {
+                "DJANGO_SUPERUSER_USERNAME": "admin",
+                "DJANGO_SUPERUSER_PASSWORD": "admin",
+                "DJANGO_SUPERUSER_EMAIL": "admin@localhost"
+            },
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py seeddata",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "seeddata",
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py dumpdata",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "dumpdata",
+                "--indent",
+                "4",
+                "myapp",
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py db_worker",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "db_worker",
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py run_periodic_tasks",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "run_periodic_tasks",
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py redis_subscriber",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "redis_subscriber",
+            ],
+            "env": {
+                // "REDIS_URL": "redis://127.0.0.1:6379/0",
+            },
+            "program": "${workspaceFolder}/manage.py"
+        },
+        {
+            "name": "manage.py shell",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "shell",
+            ],
+            "program": "${workspaceFolder}/manage.py"
+        },
+    ]
+}

@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My App</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'myapp:index' %}"><strong>My App</strong></a> <small>Django</small>
+        | <a href="{% url 'api:docs' %}">API</a>
+        {% if user.is_authenticated %}
+            | <a href="{% url 'myapp:profile_edit' %}">{{ user.username }}</a>
+            | <a href="{% url 'myapp:logout' %}">Logout</a>
+        {% else %}
+            | <a href="{% url 'myapp:login' %}">Login</a>
+            | <a href="{% url 'myapp:register' %}">Register</a>
+        {% endif %}
+    </nav>
+
+    <hr>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

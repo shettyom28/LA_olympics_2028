@@ -1,0 +1,57 @@
+services:
+  app-backend:
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+
+  app-task-worker:
+    environment:
+      - OTEL_SERVICE_NAME=app-task-worker
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+
+  app-task-scheduler:
+    environment:
+      - OTEL_SERVICE_NAME=app-task-scheduler
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+
+  app-redis-subscriber:
+    environment:
+      - OTEL_SERVICE_NAME=app-redis-subscriber
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+
+  app-microservice:
+    environment:
+      - OTEL_SERVICE_NAME=app-microservice
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+
+  grafana-lgtm:
+    build: grafana-lgtm
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-lgtm-data:/data
+
+  otel-collector:
+    build: otel-collector
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  grafana-lgtm-data:

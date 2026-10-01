@@ -1,0 +1,8 @@
+{% extends "myapp/base.html" %}
+
+{% block content %}
+<h1>{{ target_user.username }}'s Profile</h1>
+
+<p><strong>Member since:</strong> {{ target_user.date_joined|date:"d M Y" }}</p>
+<p><strong>Interests:</strong> {{ target_user.profile.interests|default:"None specified" }}</p>
+{% endblock %}

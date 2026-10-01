@@ -1,0 +1,48 @@
+{% extends "myapp/base.html" %}
+
+{% block content %}
+<h1>Message Board</h1>
+
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'myapp:add_example_message' %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.content.errors }}
+        <label for="id_content">Message:</label><br>
+        <textarea name="content" id="id_content" placeholder="Write a message..." required></textarea>
+    </div>
+    <button type="submit">Post</button>
+</form>
+{% else %}
+<p><a href="{% url 'myapp:login' %}">Login</a> to post a message.</p>
+{% endif %}
+
+<h2>Messages</h2>
+{% if board_messages %}
+    {% for msg in board_messages %}
+    <div>
+        <strong><a href="{% url 'myapp:profile_detail' msg.user.username %}">{{ msg.user.username }}</a></strong>
+        <small>({{ msg.created_at }})</small>
+        <small>[
+            {% if msg.random_number == 101 %}
+                Events start at 9 AM daily.
+            {% elif msg.random_number == 202 %}
+                USA is leading the medal table.
+            {% elif msg.random_number == 303 %}
+                Tickets available on official website.
+            {% else %}
+                Sorry, I don't understand.
+            {% endif %}
+        ]</small>
+        {% if msg.image %}
+            <br><img src="{% url 'myapp:serve_example_image' msg.id %}" alt="image" width="64" height="64">
+        {% endif %}
+        <p>{{ msg.content }}</p>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No messages yet.</p>
+{% endif %}
+{% endblock %}

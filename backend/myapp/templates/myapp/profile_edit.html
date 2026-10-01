@@ -1,0 +1,16 @@
+{% extends "myapp/base.html" %}
+
+{% block content %}
+<h1>Edit Profile</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.interests.errors }}
+        <label for="id_interests">Interests:</label><br>
+        <textarea name="interests" id="id_interests">{{ form.interests.value|default_if_none:'' }}</textarea>
+    </div>
+    <button type="submit">Update</button>
+</form>
+{% endblock %}

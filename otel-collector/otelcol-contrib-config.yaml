@@ -1,0 +1,57 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus/django:
+    config:
+      scrape_configs:
+        - job_name: "django"
+          scrape_interval: 20s
+          static_configs:
+            - targets: ["app-backend:8000"]
+  postgresql:
+    endpoint: db:5432
+    transport: tcp
+    username: myappdbuser
+    password: myappdbpass
+    databases:
+      - myappdb
+    collection_interval: 60s
+    tls:
+      insecure: true
+  redis:
+    endpoint: redis:6379
+    password: myredispass
+    collection_interval: 60s
+
+processors:
+  filter/drop_internal:
+    metrics:
+      exclude:
+        match_type: regexp
+        metric_names:
+          - "^traces_.*"
+          - "^scrape_.*"
+          - "^otelcol_.*"
+          - "^up$"
+  batch:
+
+exporters:
+  otlp_http:
+    endpoint: http://grafana-lgtm:4318
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp_http]
+    metrics:
+      receivers: [otlp, prometheus/django, postgresql, redis]
+      processors: [filter/drop_internal, batch]
+      exporters: [otlp_http]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp_http]

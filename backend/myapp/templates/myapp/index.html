@@ -1,0 +1,70 @@
+{% extends "myapp/base.html" %}
+
+{% block content %}
+<h1>Olympic Games 2026</h1>
+
+<div class="events-section">
+    <h2>Upcoming Events</h2>
+    {% if events %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Sport</th>
+                    <th>Venue</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.sport.name }}</td>
+                    <td>{{ event.venue.name }}</td>
+                    <td>{{ event.start_time|date:"DATETIME_FORMAT" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No upcoming events listed.</p>
+    {% endif %}
+</div>
+
+<hr>
+
+<div class="messages-section">
+    <h2>Message Board (Service Demo)</h2>
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'myapp:index' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                {{ form.content.errors }}
+                <label for="id_content">Message:</label><br>
+                <textarea name="content" id="id_content" placeholder="Write a message..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post & Notify Service</button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'myapp:login' %}">Login</a> to post a message.</p>
+    {% endif %}
+
+    <h3>Latest Activity</h3>
+    {% if board_messages %}
+        {% for msg in board_messages %}
+        <div class="message-item">
+            <strong><a href="{% url 'myapp:profile_detail' msg.user.username %}">{{ msg.user.username }}</a></strong>
+            <small>({{ msg.created_at }})</small>
+            {% if msg.random_number %}
+                <span class="badge bg-info text-dark">Propagated Number: {{ msg.random_number }}</span>
+            {% endif %}
+            <p>{{ msg.content }}</p>
+        </div>
+        <hr>
+        {% endfor %}
+    {% else %}
+        <p>No activity yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

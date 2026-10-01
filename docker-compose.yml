@@ -1,0 +1,137 @@
+services:
+  app-frontend:
+    build: frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      app-backend:
+        condition: service_started
+
+  app-backend:
+    build: backend
+    image: app-backend
+    ports:
+      - "8081:8000"
+    environment: &backend-env
+      - SECRET_KEY=change-me-in-production-use-a-long-random-value
+      - DATABASE_URL=postgresql://myappdbuser:myappdbpass@db:5432/myappdb
+      - ALLOWED_HOSTS=localhost,127.0.0.1,app-backend
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080,http://localhost:8081
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@localhost
+      - EMAIL_HOST=mailpit
+      - EMAIL_PORT=1025
+      - EMAIL_HOST_USER=mysmtpuser
+      - EMAIL_HOST_PASSWORD=mysmtppass
+      - DEFAULT_FROM_EMAIL=myapp@localhost
+      - REDIS_URL=redis://:myredispass@redis:6379/0
+      - SERVICE_API_TOKEN=myservicetoken
+      - OBJECT_STORE_ENDPOINT=minio:9000
+      - OBJECT_STORE_BUCKET=myapp-s3-bucket
+      - OBJECT_STORE_ACCESS_KEY=minioadmin
+      - OBJECT_STORE_SECRET_KEY=minioadmin
+    volumes:
+      - app-storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/sports/')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  db:
+    image: docker.io/library/postgres:17
+    environment:
+      - POSTGRES_DB=myappdb
+      - POSTGRES_USER=myappdbuser
+      - POSTGRES_PASSWORD=myappdbpass
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "myappdbuser", "-d", "myappdb"]
+      interval: 20s
+      retries: 3
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app-task-worker:
+    image: app-backend
+    command: opentelemetry-instrument python manage.py db_worker
+    environment: *backend-env
+    depends_on:
+      app-backend:
+        condition: service_started
+
+  app-task-scheduler:
+    image: app-backend
+    command: opentelemetry-instrument python manage.py run_periodic_tasks
+    environment: *backend-env
+    depends_on:
+      app-backend:
+        condition: service_started
+
+  app-redis-subscriber:
+    image: app-backend
+    command: opentelemetry-instrument python manage.py redis_subscriber
+    environment: *backend-env
+    depends_on:
+      app-backend:
+        condition: service_started
+
+  app-microservice:
+    build: microservice
+    environment:
+      - REDIS_URL=redis://:myredispass@redis:6379/0
+      - API_BASE=http://app-backend:8000
+      - SERVICE_API_TOKEN=myservicetoken
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+      app-backend:
+        condition: service_started
+
+  redis:
+    image: docker.io/library/redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--loglevel", "warning", "--requirepass", "myredispass"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "myredispass", "ping"]
+      interval: 20s
+      retries: 3
+
+  mailpit:
+    image: docker.io/axllent/mailpit:v1.29
+    ports:
+      - "8025:8025"
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
+
+  minio:
+    image: docker.io/minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+    command: server /data --console-address ":9001"
+    ports:
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  app-storage:
+  pgdata:
+  minio-data:

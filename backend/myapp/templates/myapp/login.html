@@ -1,0 +1,23 @@
+{% extends "myapp/base.html" %}
+
+{% block content %}
+<h1>Login</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.username.errors }}
+        <label for="id_username">Username:</label><br>
+        <input type="text" name="username" id="id_username" maxlength="150" required>
+    </div>
+    <div>
+        {{ form.password.errors }}
+        <label for="id_password">Password:</label><br>
+        <input type="password" name="password" id="id_password" required>
+    </div>
+    <button type="submit">Login</button>
+</form>
+
+<p>Don't have an account? <a href="{% url 'myapp:register' %}">Register</a></p>
+{% endblock %}
